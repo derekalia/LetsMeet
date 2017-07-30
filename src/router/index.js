@@ -29,7 +29,7 @@ export const Tabs = TabNavigator(
       screen: ChatStack,
       navigationOptions: {
         tabBarlabel: 'Profile',
-        tabBarIcon: ({ tintColor }) => <Icon name="search" size={30} color={tintColor} />,
+        tabBarIcon: ({ tintColor }) => <Icon name="chat" size={30} color={tintColor} />,
         tabBarVisible: true,
       }
     },

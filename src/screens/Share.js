@@ -1,17 +1,37 @@
 import React from 'react';
 import { Text, View, Button, TextInput } from 'react-native';
+import createOrUpdateUser from '../createOrUpdateUser';
+import Location from '../userLocation';
 
 class Share extends React.Component {
   state = {
     text: ''
   };
 
+  //change the activity to whatever is clicked and set active to true
+  upDateActivity = async(act) => {
+      
+    let location = await Location();
+
+
+    let user = {
+        ...this.props.screenProps.auth,
+        activity: act,
+        isActive: true,
+        coords: location.coords
+
+    }
+    console.log(user)
+    createOrUpdateUser(user)
+  }
+  
+
   render() {
     return (
       <View>
         <Text>Share</Text>
-        <Button title="Coffee" onPress={() => console.log('hi')}/>
-        <Button title="Running" onPress={() => console.log('hi')}/>
+        <Button title="Coffee" onPress={()=>this.upDateActivity('coffee')}/>
+        <Button title="Running" onPress={() => this.upDateActivity('running')}/>
         <Button title="Movie" onPress={() => console.log('hi')}/>
         <Button title="Food" onPress={() => console.log('hi')}/>
         <Button title="Drinks" onPress={() => console.log('hi')}/>

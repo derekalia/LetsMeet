@@ -7,7 +7,7 @@ export default (getLocation = async () => {
     throw new Error('Permission to access location was denied');
   }
 
-  const location = await Location.getCurrentPositionAsync({});
+  const location = await Location.getCurrentPositionAsync({enableHighAccuracy:true,maximumAge:100 });
 
   return location;
 });
