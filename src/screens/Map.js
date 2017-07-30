@@ -3,7 +3,7 @@ import { Platform, Text, View, StyleSheet } from 'react-native';
 import getLocation from '../userLocation';
 import { Constants, Location, Permissions, MapView } from 'expo';
 
-export default class MapScreen extends React.Component {
+export default class Map extends React.Component {
   state = {
     location: null,
     errorMessage: null
@@ -30,9 +30,10 @@ export default class MapScreen extends React.Component {
   };
 
   render() {
-    const { people } = this.props;
-    const markers = people.map(person =>
+    const { people } = this.props.screenProps.map;
+    const markers = (people || []).map(person =>
       <MapView.Marker
+        key={person.name + person.activity}
         coordinate={person.coords}
         title={person.name}
         description={person.activity}
