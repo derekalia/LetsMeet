@@ -12,7 +12,7 @@ class Share extends React.Component {
   upDateActivity = async(act) => {  
     let location = await Location();
     let user = {
-        ...this.props.screenProps.auth,
+        ...this.props.screenProps,
         activity: act,
         isActive: true,
         coords: location.coords
