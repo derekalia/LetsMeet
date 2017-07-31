@@ -5,17 +5,16 @@ import { Constants, Location, Permissions, MapView } from 'expo';
 import createOrUpdateUser from '../createOrUpdateUser';
 import rapidClient from '../rapid';
 
-
 export default class Map extends React.Component {
   state = {
     location: null,
     errorMessage: null,
-    activeUsers:null
+    activeUsers: null,
+    auth: {}
   };
 
-
-  // componentWillReceiveProps(nextProps){  
-  //     console.log('new', nextProps);  
+  // componentWillReceiveProps(nextProps){
+  //     console.log('new', nextProps);
   // }
 
   componentWillMount = async () => {
@@ -29,26 +28,39 @@ export default class Map extends React.Component {
         console.log('Location? ', location);
         this.setState({ location });
 
-    rapidClient.collection('users')
-        .filter({isActive: true})
-        .subscribe(users => {
-          const activeUsers = users.map(user => {
-            return user.body
-          })
-          console.log('activeUsers in map',activeUsers)
-          this.setState({activeUsers})
-        }, error => {
-          console.log('Error: ', error)
-        })    
+        rapidClient.collection('users').filter({ isActive: true }).subscribe(
+          users => {
+            const activeUsers = users.map(user => {
+              return user.body;
+            });
+            console.log('activeUsers in map', activeUsers);
+            this.setState({ activeUsers });
+          },
+          error => {
+            console.log('Error: ', error);
+          }
+        );
       } catch (error) {
         this.setState({
           errorMessage: error.message
         });
       }
 
+      this.setState({auth: this.props.screenProps.auth})
+      rapidClient.collection('users').filter({ id: this.props.screenProps.auth.id }).subscribe(
+        users => {
+          console.log('users', users);
+          const userData = users.map(user => {
+            return user.body;
+          });
+          this.setState({ auth: userData[0] });
+          console.log('State Reset!! in map', this.state.auth);
+        },
+        error => {
+          console.log('Error: ', error);
+        }
+      );
     }
-
-      
   };
 
   stopSharing = () => {
@@ -90,16 +102,17 @@ export default class Map extends React.Component {
           longitudeDelta: 0.04
         }}
       >
-         <Button style={{ backgroundColor: 'pink' }} onPress={()=>this.stopSharing()} title='Remove'/>
+        {this.state.auth.isActive && <Button style={{ backgroundColor: 'pink' }} onPress={() => this.stopSharing()} title="Remove" />}
 
-        {this.state.activeUsers && this.state.activeUsers.map(marker =>
-          <MapView.Marker
-            coordinate={marker.coords}
-            title={marker.name}
-            key={marker.id}
-            description={marker.activity}
-          />
-        )}
+        {this.state.activeUsers &&
+          this.state.activeUsers.map(marker =>
+            <MapView.Marker
+              coordinate={marker.coords}
+              title={marker.name}
+              key={marker.id}
+              description={marker.activity}
+            />
+          )}
         {this.state.location &&
           <MapView.Marker coordinate={this.state.location.coords} title="Me" description="Hacking" />}
       </MapView>

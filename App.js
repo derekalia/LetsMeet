@@ -57,23 +57,23 @@ export default class App extends React.Component {
     }
 
 
-      rapidClient.collection('users')
-        .filter({id: this.state.auth.id})
-        .subscribe(users => {
-          console.log('users',users)
-          const userData = users.map(user => {
-            return user.body
-          })
-          const auth = {
-            user: userData[0]
-          }
-          this.setState({auth})
-          console.log('State Reset!!', this.state.auth)
+      // rapidClient.collection('users')
+      //   .filter({id: this.state.auth.id})
+      //   .subscribe(users => {
+      //     console.log('users',users)
+      //     const userData = users.map(user => {
+      //       return user.body
+      //     })
+      //     const auth = {
+      //       user: userData[0]
+      //     }
+      //     this.setState({auth})
+      //     console.log('State Reset!!', this.state.auth)
 
           
-        }, error => {
-          console.log('Error: ', error)
-        })
+      //   }, error => {
+      //     console.log('Error: ', error)
+      //   })
         
 
 
