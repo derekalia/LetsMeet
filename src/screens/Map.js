@@ -1,15 +1,22 @@
 import React, { Component } from 'react';
-import { Platform, Text, View, StyleSheet,Button } from 'react-native';
+import { Platform, Text, View, StyleSheet, Button, TouchableHighlight } from 'react-native';
 import getLocation from '../userLocation';
 import { Constants, Location, Permissions, MapView } from 'expo';
-import createOrUpdateUser from '../createOrUpdateUser'
+import createOrUpdateUser from '../createOrUpdateUser';
+import rapidClient from '../rapid';
 
 
 export default class Map extends React.Component {
   state = {
     location: null,
-    errorMessage: null
+    errorMessage: null,
+    activeUsers:null
   };
+
+
+  // componentWillReceiveProps(nextProps){  
+  //     console.log('new', nextProps);  
+  // }
 
   componentWillMount = async () => {
     if (Platform.OS === 'android' && !Constants.isDevice) {
@@ -17,63 +24,85 @@ export default class Map extends React.Component {
         errorMessage: 'Oops, this will not work on Sketch in an Android emulator. Try it on your device!'
       });
     } else {
-      try {        
+      try {
         const location = await getLocation();
         console.log('Location? ', location);
-        this.setState({
-          location
-        });
+        this.setState({ location });
+
+    rapidClient.collection('users')
+        .filter({isActive: true})
+        .subscribe(users => {
+          const activeUsers = users.map(user => {
+            return user.body
+          })
+          console.log('activeUsers in map',activeUsers)
+          this.setState({activeUsers})
+        }, error => {
+          console.log('Error: ', error)
+        })    
       } catch (error) {
         this.setState({
           errorMessage: error.message
         });
       }
+
     }
+
+      
   };
 
-  
   stopSharing = () => {
-    console.log(this.props)
-    createOrUpdateUser({id: this.props.screenProps.auth.id,isActive:false, activity: null})
-  } 
+    console.log('stopSharing', this.props);
+    createOrUpdateUser({ id: this.props.screenProps.auth.id, isActive: false, activity: null });
+  };
+
+  getMarkers = () => {
+    const { people } = this.props.screenProps;
+    // console.log(people);
+    const markers = (people || [])
+      .map(person =>
+        <MapView.Marker
+          key={person.id}
+          coordinate={person.coords}
+          title={person.name}
+          description={person.activity}
+          image={{ uri: person.avatar }}
+        />
+      );
+    console.log(markers);
+    return markers;
+  };
 
   render() {
-    const { people } = this.props.screenProps.map;
-    const markers = (people || []).map(person =>
-      <MapView.Marker
-        key={person.name + person.activity}
-        coordinate={person.coords}
-        title={person.name}
-        description={person.activity}
-        image={{ uri: person.avatar }}
-      />
+    console.log('this.props.screenProps', this.props.screenProps);
+    console.log('the state', this.state);
+    // const button = (this.props.screenProps.user || {}).isActive
+    //   ? <TouchableHighlight style={{ backgroundColor: 'pink' }} onPress={this.stopSharing}><Text>Hello</Text></TouchableHighlight>
+    //   : <TouchableHighlight style={{ backgroundColor: 'blue' }}><Text>this</Text></TouchableHighlight>;
+    // console.log('Checking... lol: ', (this.props.screenProps.auth || {}).isActive);
+    return (
+      <MapView
+        style={{ flex: 1 }}
+        initialRegion={{
+          latitude: 37.774929,
+          longitude: -122.419416,
+          latitudeDelta: 0.09,
+          longitudeDelta: 0.04
+        }}
+      >
+         <Button style={{ backgroundColor: 'pink' }} onPress={()=>this.stopSharing()} title='Remove'/>
+
+        {this.state.activeUsers && this.state.activeUsers.map(marker =>
+          <MapView.Marker
+            coordinate={marker.coords}
+            title={marker.name}
+            key={marker.id}
+            description={marker.activity}
+          />
+        )}
+        {this.state.location &&
+          <MapView.Marker coordinate={this.state.location.coords} title="Me" description="Hacking" />}
+      </MapView>
     );
-
-    if (this.state.location) {
-      console.log(this.state.location.coords);
-
-      text = JSON.stringify(this.state.location);
-    }
-
-      console.log('this.props.screenProps',this.props.screenProps)
-
-    const button = (this.props.screenProps.auth || {}).isActive ? 
-      <Button style={{color:'pink'}} title='hi' onPress={this.stopSharing}/> :  <Button style={{color:'pink'}} title='hi'/>
-      console.log('Checking... lol: ', (this.props.screenProps.auth || {}).isActive)
-    return this.state.location
-      ? <MapView
-          style={{ flex: 1 }}
-          initialRegion={{
-            latitude: this.state.location.coords.latitude,
-            longitude: this.state.location.coords.longitude,
-            latitudeDelta: 0.09,
-            longitudeDelta: 0.04
-          }}
-        >
-        {button}
-          {markers}
-          <MapView.Marker coordinate={this.state.location.coords} title="Me" description="Hacking" />
-        </MapView>
-      : null;
   }
 }

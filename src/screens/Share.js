@@ -9,11 +9,8 @@ class Share extends React.Component {
   };
 
   //change the activity to whatever is clicked and set active to true
-  upDateActivity = async(act) => {
-      
+  upDateActivity = async(act) => {  
     let location = await Location();
-
-
     let user = {
         ...this.props.screenProps.auth,
         activity: act,
@@ -21,7 +18,7 @@ class Share extends React.Component {
         coords: location.coords
 
     }
-    console.log(user)
+    console.log('user ',user)
     createOrUpdateUser(user)
   }
   

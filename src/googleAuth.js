@@ -8,7 +8,7 @@ export default async function signInWithGoogleAsync() {
     });
 
     if (result.type === 'success') {
-      console.log(result)
+      console.log('result of signInWithGoogleAsync',result )
       return result;
     } else {
       return {cancelled: true};

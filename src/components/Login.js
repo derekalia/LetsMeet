@@ -11,7 +11,7 @@ export default class Login extends React.Component {
 
   render() {      
     return (
-      <View>        
+      <View>
          <Button title="Login With Google" onPress={this.props.captureAuth} />         
       </View>
     );
